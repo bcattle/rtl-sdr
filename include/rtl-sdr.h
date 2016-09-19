@@ -382,6 +382,47 @@ RTLSDR_API int rtlsdr_read_async(rtlsdr_dev_t *dev,
  */
 RTLSDR_API int rtlsdr_cancel_async(rtlsdr_dev_t *dev);
 
+/*!
+ * Sets the value of a pin on the GPIO port
+ * Before reading, the pin must be configured as an output
+ * by calling rtlsdr_set_gpio_output
+ *
+ * \param dev the device handle given by rtlsdr_open()
+ * \param gpio The pin to set, 0..7
+ * \param val The value to set on the pin, 0..1
+ * \return 0 on success
+ */
+RTLSDR_API int rtlsdr_set_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int val);
+
+/*!
+ * Configures a given pin of the GPIO port for output
+ *
+ * \param dev the device handle given by rtlsdr_open()
+ * \param gpio The pin to configure as an output, 0..7
+ * \return 0 on success
+ */
+RTLSDR_API int rtlsdr_set_gpio_output(rtlsdr_dev_t *dev, uint8_t gpio);
+
+/*!
+ * Reads the value of a pin on the GPIO port.
+ * Before reading, the pin must be configured as an input
+ * by calling rtlsdr_set_gpio_input
+ *
+ * \param dev the device handle given by rtlsdr_open()
+ * \param gpio The pin to configure as an output, 0..7
+ * \return 0 on success
+ */
+RTLSDR_API void rtlsdr_get_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int *val);
+
+/*!
+ * Configures a given pin of the GPIO port for input
+ *
+ * \param dev the device handle given by rtlsdr_open()
+ * \param gpio The pin to configure as an output, 0..7
+ * \return 0 on success
+ */
+RTLSDR_API int rtlsdr_set_gpio_input(rtlsdr_dev_t *dev, uint8_t gpio);
+
 #ifdef __cplusplus
 }
 #endif

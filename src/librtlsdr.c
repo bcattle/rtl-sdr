@@ -129,8 +129,6 @@ struct rtlsdr_dev {
 	int spectrum_inversion;
 };
 
-void rtlsdr_set_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int val);
-
 /* generic tuner interface functions, shall be moved to the tuner implementations */
 int e4000_init(void *dev) {
 	rtlsdr_dev_t* devt = (rtlsdr_dev_t*)dev;
@@ -550,25 +548,53 @@ int rtlsdr_demod_write_reg(rtlsdr_dev_t *dev, uint8_t page, uint16_t addr, uint1
 	return (r == len) ? 0 : -1;
 }
 
-void rtlsdr_set_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int val)
+int rtlsdr_set_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int val)
 {
+	int ret;
 	uint16_t r;
 
 	gpio = 1 << gpio;
 	r = rtlsdr_read_reg(dev, SYSB, GPO, 1);
 	r = val ? (r | gpio) : (r & ~gpio);
-	rtlsdr_write_reg(dev, SYSB, GPO, r, 1);
+	ret = rtlsdr_write_reg(dev, SYSB, GPO, r, 1);
+	return ret;
 }
 
-void rtlsdr_set_gpio_output(rtlsdr_dev_t *dev, uint8_t gpio)
+int rtlsdr_set_gpio_output(rtlsdr_dev_t *dev, uint8_t gpio)
 {
-	int r;
+	int r, ret;
 	gpio = 1 << gpio;
 
 	r = rtlsdr_read_reg(dev, SYSB, GPD, 1);
-	rtlsdr_write_reg(dev, SYSB, GPO, r & ~gpio, 1);
+	ret = rtlsdr_write_reg(dev, SYSB, GPO, r & ~gpio, 1);
+	if (ret)
+		return ret;
 	r = rtlsdr_read_reg(dev, SYSB, GPOE, 1);
-	rtlsdr_write_reg(dev, SYSB, GPOE, r | gpio, 1);
+	ret = rtlsdr_write_reg(dev, SYSB, GPOE, r | gpio, 1);
+	return ret;
+}
+
+void rtlsdr_get_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int *val)
+{
+	uint16_t r;
+
+	gpio = 1 << gpio;
+	r = rtlsdr_read_reg(dev, SYSB, GPI, 1);
+	*val = (r & gpio) ? 1 : 0;
+}
+
+int rtlsdr_set_gpio_input(rtlsdr_dev_t *dev, uint8_t gpio)
+{
+	int r, ret;
+	gpio = 1 << gpio;
+
+	r = rtlsdr_read_reg(dev, SYSB, GPD, 1);
+	ret = rtlsdr_write_reg(dev, SYSB, GPD, r | gpio, 1);
+	if (ret)
+		return ret;
+	r = rtlsdr_read_reg(dev, SYSB, GPOE, 1);
+	ret = rtlsdr_write_reg(dev, SYSB, GPOE, r & ~gpio, 1);
+	return ret;
 }
 
 void rtlsdr_set_i2c_repeater(rtlsdr_dev_t *dev, int on)
