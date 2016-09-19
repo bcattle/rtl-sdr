@@ -567,7 +567,7 @@ int rtlsdr_set_gpio_output(rtlsdr_dev_t *dev, uint8_t gpio)
 
 	r = rtlsdr_read_reg(dev, SYSB, GPD, 1);
 	ret = rtlsdr_write_reg(dev, SYSB, GPO, r & ~gpio, 1);
-	if (ret)
+	if (ret < 0)
 		return ret;
 	r = rtlsdr_read_reg(dev, SYSB, GPOE, 1);
 	ret = rtlsdr_write_reg(dev, SYSB, GPOE, r | gpio, 1);
@@ -577,10 +577,16 @@ int rtlsdr_set_gpio_output(rtlsdr_dev_t *dev, uint8_t gpio)
 void rtlsdr_get_gpio_bit(rtlsdr_dev_t *dev, uint8_t gpio, int *val)
 {
 	uint16_t r;
-
 	gpio = 1 << gpio;
 	r = rtlsdr_read_reg(dev, SYSB, GPI, 1);
 	*val = (r & gpio) ? 1 : 0;
+}
+
+void rtlsdr_get_gpio_byte(rtlsdr_dev_t *dev, uint8_t *val)
+{
+	uint16_t r;
+	r = rtlsdr_read_reg(dev, SYSB, GPI, 1);
+	*val = r & 0xff;
 }
 
 int rtlsdr_set_gpio_input(rtlsdr_dev_t *dev, uint8_t gpio)
@@ -590,7 +596,7 @@ int rtlsdr_set_gpio_input(rtlsdr_dev_t *dev, uint8_t gpio)
 
 	r = rtlsdr_read_reg(dev, SYSB, GPD, 1);
 	ret = rtlsdr_write_reg(dev, SYSB, GPD, r | gpio, 1);
-	if (ret)
+	if (ret < 0)
 		return ret;
 	r = rtlsdr_read_reg(dev, SYSB, GPOE, 1);
 	ret = rtlsdr_write_reg(dev, SYSB, GPOE, r & ~gpio, 1);
